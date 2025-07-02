@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>黄金商城预览</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React Libraries -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <!-- Babel for JSX transpilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        /* Custom styles for better appearance */
+        body {
+            background-color: #f9fafb; /* A light gray background for the page */
+        }
+        #root {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        }
+    </style>
+</head>
+<body>
+    <!-- The root element where the React app will be mounted -->
+    <div id="root"></div>
+
+    <!-- The React application code, with type="text/babel" for Babel to transpile -->
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef } = React;
+
+        // --- Icon Components (recreated as SVGs to remove dependency) ---
+        const Icon = ({ children, ...props }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>{children}</svg>
+        );
+        const Home = (props) => <Icon {...props}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></Icon>;
+        const Layers = (props) => <Icon {...props}><polygon points="12 2 2 7 12 12 22 7 12 2" /><polyline points="2 17 12 22 22 17" /><polyline points="2 12 12 17 22 12" /></Icon>;
+        const User = (props) => <Icon {...props}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></Icon>;
+        const Star = (props) => <Icon {...props}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></Icon>;
+        const Gem = (props) => <Icon {...props}><path d="M6 3h12l4 6-10 13L2 9Z" /><path d="M12 22V9" /><path d="m3.5 8.5 17 0" /></Icon>;
+        const Crown = (props) => <Icon {...props}><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" /></Icon>;
+        const Gift = (props) => <Icon {...props}><polyline points="20 12 20 22 4 22 4 12" /><rect x="2" y="7" width="20" height="5" /><line x1="12" y1="22" x2="12" y2="7" /><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" /><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" /></Icon>;
+        const Sparkles = (props) => <Icon {...props}><path d="M9.937 15.04c.535-1.612 1.4-2.873 2.52-3.85a3.973 3.973 0 0 1 3.512-1.195A3.973 3.973 0 0 1 19 8.963c.338.98.2 1.995-.398 2.768-1.028 1.32-2.58 1.936-4.282 1.96a4.962 4.962 0 0 1-2.04-.366Z" /><path d="m14 2-1 4-4-1 1 4-4-1 1 4-4-1 1 4" /><path d="M22 14l-4 1 1-4 4 1-1-4 4 1-1-4-4 1" /><path d="M15 22v-4" /><path d="M20 17h-4" /></Icon>;
+        const Sprout = (props) => <Icon {...props}><path d="M7 20h10" /><path d="M10 20c-.5-2.5-.8-5-1-7.5" /><path d="M14 20c.5-2.5.8-5 1-7.5" /><path d="M12 12.5c-1.5-2-2.5-4-1-6 1-1.5 2.5-1.5 3.5 0 1.5 2 1 4-1 6" /><path d="M12 12.5c1.5-2 2.5-4 1-6-1-1.5-2.5-1.5-3.5 0-1.5 2-1 4 1 6" /></Icon>;
+        const ShoppingCart = (props) => <Icon {...props}><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></Icon>;
+        const Search = (props) => <Icon {...props}><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></Icon>;
+        const ChevronRight = (props) => <Icon {...props}><polyline points="9 18 15 12 9 6" /></Icon>;
+        const Ticket = (props) => <Icon {...props}><path d="M2 9a3 3 0 0 1 0 6v1a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-1a3 3 0 0 1 0-6V8a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" /><path d="M13 5v2" /><path d="M13 17v2" /><path d="M13 11v2" /></Icon>;
+        const CircleUserRound = (props) => <Icon {...props}><path d="M18 20a6 6 0 0 0-12 0" /><circle cx="12" cy="10" r="4" /><circle cx="12" cy="12" r="10" /></Icon>;
+        const Award = (props) => <Icon {...props}><circle cx="12" cy="8" r="6" /><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" /></Icon>;
+        const Diamond = (props) => <Icon {...props}><path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41L13.41 2.7a2.41 2.41 0 0 0-3.41 0Z" /></Icon>;
+        const ShieldCheck = (props) => <Icon {...props}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /><path d="m9 12 2 2 4-4" /></Icon>;
+        const Gamepad2 = (props) => <Icon {...props}><path d="M20 8.5v4.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8.5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2Z"/><path d="M8 12h2"/><path d="M10 10v4"/><path d="M14 10.5h.01"/><path d="M16 12.5h.01"/></Icon>;
+        const LogIn = (props) => <Icon {...props}><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" x2="3" y1="12" y2="12" /></Icon>;
+        const LogOut = (props) => <Icon {...props}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" x2="9" y1="12" y2="12" /></Icon>;
+        const PartyPopper = (props) => <Icon {...props}><path d="M4.5 12.5a2.5 2.5 0 0 1 0-5C5.8 6.2 7.3 5 9 5c1.7 0 3.2 1.2 4.5 2.5a2.5 2.5 0 0 1 0 5" /><path d="M16 12.5a2.5 2.5 0 0 0 0-5c-1.3-1.3-2.8-2.5-4.5-2.5S8.3 6.2 7 7.5" /><path d="M12 13v8" /><path d="M9 17h6" /><path d="m12 4-1-1 1-1 1 1-1 1" /><path d="m19 8-1-1 1-1 1 1-1 1" /><path d="m5 8-1-1 1-1 1 1-1 1" /><path d="m12 13-1.5 1.5" /><path d="m10.5 21.5 1.5-1.5" /><path d="m12 13 1.5 1.5" /><path d="m13.5 21.5-1.5-1.5" /></Icon>;
+        const HelpCircle = (props) => <Icon {...props}><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></Icon>;
+        const X = (props) => <Icon {...props}><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></Icon>;
+        const LayoutDashboard = (props) => <Icon {...props}><rect width="7" height="9" x="3" y="3" rx="1" /><rect width="7" height="5" x="14" y="3" rx="1" /><rect width="7" height="9" x="14" y="12" rx="1" /><rect width="7" height="5" x="3" y="16" rx="1" /></Icon>;
+        const CheckSquare = (props) => <Icon {...props}><polyline points="9 11 12 14 22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></Icon>;
+        const Settings = (props) => <Icon {...props}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></Icon>;
+        const PlusCircle = (props) => <Icon {...props}><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" /></Icon>;
+        const Trash2 = (props) => <Icon {...props}><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /></Icon>;
+        const Edit = (props) => <Icon {...props}><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" /></Icon>;
+        const Smartphone = (props) => <Icon {...props}><rect x="5" y="2" width="14" height="20" rx="2" ry="2" /><line x1="12" y1="18" x2="12.01" y2="18" /></Icon>;
+        const Computer = (props) => <Icon {...props}><rect x="3" y="3" width="18" height="12" rx="2" /><line x1="7" y1="21" x2="17" y2="21" /><line x1="12" y1="15" x2="12" y2="21" /></Icon>;
+        const ChevronLeft = (props) => <Icon {...props}><polyline points="15 18 9 12 15 6" /></Icon>;
+        const Phone = (props) => <Icon {...props}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></Icon>;
+        const Store = (props) => <Icon {...props}><path d="m21 7.5-2-5.25A2 2 0 0 0 17.25 1H6.75a2 2 0 0 0-1.75 1.25L3 7.5" /><path d="M4 7.5 3 21h18l-1-13.5" /><path d="M12 15a2 2 0 0 0-2 2v2" /><path d="M12 15a2 2 0 0 1 2 2v2" /></Icon>;
+        const MapPin = (props) => <Icon {...props}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></Icon>;
+        const Clock = (props) => <Icon {...props}><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></Icon>;
+        const ArrowRightLeft = (props) => <Icon {...props}><path d="M8 3 4 7l4 4" /><path d="M4 7h16" /><path d="m16 21 4-4-4-4" /><path d="M20 17H4" /></Icon>;
+        const RefreshCw = (props) => <Icon {...props}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M3 21v-5h5" /></Icon>;
+        const CalendarCheck = (props) => <Icon {...props}><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /><path d="m9 16 2 2 4-4" /></Icon>;
+
+        // --- 常量和ID定义 ---
+        const ADMIN_UID = "admin-user-001";
+        const NORMAL_USER_UID = "normal-user-123";
+
+        // --- 初始样例数据 ---
+        const initialProducts = [
+            { id: 'GP001', name: '足金精品招财进宝财神爷祈福护佑珠手串', category: 'jingpin', weight: '14.05g起', image: 'https://picsum.photos/800/800?random=1', description: '采用先进的3D硬金工艺，将传统财神爷形象与现代审美结合，寓意财源滚滚，是您投资与佩戴的佳选。', params: '材质: 足金999 | 工艺: 3D硬金 | 长度: 约18cm' },
+            { id: 'GP002', name: '足金精品闪耀碎碎金吉祥大象祈福珠手链', category: 'jingpin', weight: '8.26g起', image: 'https://picsum.photos/800/800?random=2', description: '碎碎金工艺如星辰般闪耀，吉祥大象造型象征着幸运与力量。', params: '材质: 足金999 | 工艺: 碎碎金 | 长度: 约17cm'  },
+            { id: 'GF001', name: '足金精品漆光织梦鎏彩花卉芳华典雅珠手链', category: 'gufa', weight: '12.15g起', image: 'https://picsum.photos/800/800?random=3', description: '古法制金，手工打磨，漆光工艺点缀，尽显东方女性的典雅与芳华。', params: '材质: 足金999 | 工艺: 古法、漆光 | 长度: 可调节'  },
+            { id: '3D001', name: '3D硬金萌趣转运珠', category: '3d', weight: '2.5g起', image: 'https://picsum.photos/800/800?random=4', description: '小巧可爱的萌趣造型，是搭配手绳、项链的百搭单品，为您带来一整年的好运。', params: '材质: 足金999 | 工艺: 3D硬金 | 重量: 约2.5g'  },
+            { id: 'KJ001', name: '18K金时尚项链', category: 'kjin', weight: '3.1g起', image: 'https://picsum.photos/800/800?random=5', description: '简约而不简单的设计，18K金材质坚固耐用，色泽时尚，适合日常佩戴。', params: '材质: 18K金 | 工艺: 精工抛光 | 长度: 45cm'  },
+        ];
+
+        const initialCategories = [
+            { id: 'all', name: '全部商品' },
+            { id: 'gufa', name: '古法黄金' },
+            { id: 'jingpin', name: '黄金精品' },
+            { id: '3d', name: '3D硬金' },
+            { id: 'kjin', name: 'K金饰品' },
+        ];
+
+        const initialVouchers = [
+            { id: 'V001', title: '50元工费抵扣券', description: '任意消费即可使用', expiryDate: '2025-12-31', status: 'unused', value: 50, type: 'deduction' },
+            { id: 'V002', title: '新品体验券', description: '可用于“古法黄金”系列新品', expiryDate: '2025-08-31', status: 'unused', type: 'experience' },
+            { id: 'V003', title: '20元工费抵扣券', description: '消费满1000元可用', expiryDate: '2025-07-31', status: 'used', value: 20, type: 'deduction' },
+            { id: 'V004', title: '生日专属折扣券', description: '全场商品享98折', expiryDate: '2024-05-30', status: 'expired', type: 'discount' },
+        ];
+
+        // --- 自定义Hook: 使用localStorage来持久化状态 (已修复) ---
+        function useLocalStorage(key, initialValue) {
+            const [storedValue, setStoredValue] = useState(() => {
+                try {
+                    const item = window.localStorage.getItem(key);
+                    return item ? JSON.parse(item) : initialValue;
+                } catch (error) {
+                    console.log(error);
+                    return initialValue;
+                }
+            });
+
+            useEffect(() => {
+                try {
+                    window.localStorage.setItem(key, JSON.stringify(storedValue));
+                } catch (error) {
+                    console.log(error);
+                }
+            }, [key, storedValue]);
+
+            return [storedValue, setStoredValue];
+        }
+
+        // --- 幸运大转盘组件 ---
+        const LuckyWheelModal = ({ isOpen, setIsOpen, user, isLoggedIn, updateUserPoints, updateUserWheelSpin, setPrizeWon }) => {
+            const [spinning, setSpinning] = useState(false);
+            const [rotation, setRotation] = useState(0);
+            const [message, setMessage] = useState('');
+            const timers = useRef([]);
+
+            useEffect(() => {
+                return () => {
+                    timers.current.forEach(clearTimeout);
+                };
+            }, []);
+
+            const addTimeout = (callback, delay) => {
+                timers.current.push(setTimeout(callback, delay));
+            };
+            
+            const prizes = useMemo(() => [
+                { text: '50积分', color: '#FDE68A', textColor: '#92400E', points: 50, weight: 5 }, 
+                { text: '谢谢参与', color: '#FFFFFF', textColor: '#4B5563', points: 0, weight: 30 },
+                { text: '10积分', color: '#FCD34D', textColor: '#92400E', points: 10, weight: 15 }, 
+                { text: '谢谢参与', color: '#FFFFFF', textColor: '#4B5563', points: 0, weight: 30 },
+                { text: '20积分', color: '#FDE68A', textColor: '#92400E', points: 20, weight: 10 },
+                { text: '谢谢参与', color: '#FFFFFF', textColor: '#4B5563', points: 0, weight: 30 },
+                { text: '5积分', color: '#FCD34D', textColor: '#92400E', points: 5, weight: 40 },
+                { text: '谢谢参与', color: '#FFFFFF', textColor: '#4B5563', points: 0, weight: 30 }
+            ], []);
+
+            const getWeightedRandomPrizeIndex = () => {
+                const totalWeight = prizes.reduce((sum, prize) => sum + prize.weight, 0);
+                let randomNum = Math.random() * totalWeight;
+                for (let i = 0; i < prizes.length; i++) {
+                    if (randomNum < prizes[i].weight) return i;
+                    randomNum -= prizes[i].weight;
+                }
+                return 0; // Fallback
+            };
+            
+            const spinWheel = () => {
+                if (spinning) return;
+                if (!isLoggedIn || !user) {
+                    setMessage("请先登录再参与！");
+                    addTimeout(() => {
+                        setMessage('');
+                        setIsOpen(false);
+                    }, 2000);
+                    return;
+                }
+
+                const today = new Date().toDateString();
+                if (user.lastWheelSpin === today) {
+                    setMessage("您今天已经抽过奖啦，明天再来吧！");
+                    addTimeout(() => setMessage(''), 2000);
+                    return;
+                }
+                
+                setMessage('');
+                setSpinning(true);
+                const prizeIndex = getWeightedRandomPrizeIndex();
+                const sectorAngle = 360 / prizes.length;
+                const targetAngle = sectorAngle * prizeIndex + sectorAngle / 2;
+                
+                const currentRotation = rotation % 360;
+                const newRotation = rotation - currentRotation + (360 * 5) + (360 - targetAngle);
+                setRotation(newRotation);
+
+                addTimeout(() => {
+                    const wonPrize = prizes[prizeIndex];
+                    setPrizeWon(wonPrize); 
+
+                    if (wonPrize.points > 0) {
+                        updateUserPoints(user.uid, user.points + wonPrize.points);
+                    }
+                    updateUserWheelSpin(user.uid, today);
+                    
+                    setSpinning(false);
+                }, 5100);
+            };
+
+            if (!isOpen) return null;
+
+            const conicGradient = prizes.map((p, i) => `${p.color} ${i * (100 / prizes.length)}% ${(i + 1) * (100 / prizes.length)}%`).join(', ');
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
+                    <div className="relative">
+                        <div className="absolute -inset-2 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full blur-lg opacity-75"></div>
+                        <div className="relative bg-gradient-to-br from-red-600 to-red-800 p-6 rounded-2xl shadow-2xl border-4 border-yellow-400 text-center">
+                            <button type="button" onClick={() => !spinning && setIsOpen(false)} className="absolute top-2 right-2 bg-white/50 backdrop-blur-sm rounded-full h-8 w-8 flex items-center justify-center text-red-800 font-bold z-20">&times;</button>
+                            <h2 className="text-4xl font-bold text-white mb-4" style={{textShadow: '2px 2px #c00'}}>幸运大转盘</h2>
+                            <div className="relative w-80 h-80 mx-auto my-4">
+                                <div className="absolute w-12 h-16 -top-5 left-1/2 -translate-x-1/2 z-10" style={{ filter: 'drop-shadow(0 4px 3px rgba(0,0,0,0.4))' }}>
+                                     <div className="w-full h-full bg-gradient-to-b from-red-500 to-red-700" style={{clipPath: 'polygon(50% 100%, 0 40%, 20% 0, 80% 0, 100% 40%)'}}></div>
+                                </div>
+
+                                <div 
+                                    className="absolute w-full h-full"
+                                    style={{
+                                        transition: spinning ? 'transform 5s cubic-bezier(0.25, 0.1, 0.25, 1)' : 'none',
+                                        transform: `rotate(${rotation}deg)`
+                                    }}
+                                >
+                                    <div 
+                                        className="w-full h-full rounded-full border-8 border-yellow-400"
+                                        style={{ background: `conic-gradient(from -90deg at 50% 50%, ${conicGradient})` }}
+                                    >
+                                        {prizes.map((prize, i) => {
+                                            const angle = (360 / prizes.length) * i + (360 / prizes.length / 2);
+                                            return (
+                                                <div key={i} className="absolute w-full h-full flex justify-center items-start" style={{ transform: `rotate(${angle}deg)` }}>
+                                                    <span className="text-sm font-bold mt-6" style={{ color: prize.textColor, transform: 'rotate(-90deg)' }}>{prize.text}</span>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+
+                                <button 
+                                    type="button"
+                                    disabled={spinning}
+                                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full flex items-center justify-center cursor-pointer shadow-xl transition-transform duration-200 hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
+                                    onClick={spinWheel}
+                                    style={{
+                                        background: 'radial-gradient(circle, #FDE047 0%, #F59E0B 100%)',
+                                        border: '4px solid white'
+                                    }}
+                                >
+                                    <span className="text-red-800 font-extrabold text-3xl select-none" style={{textShadow: '1px 1px #fff'}}>
+                                        {spinning ? '...' : '抽奖'}
+                                    </span>
+                                </button>
+                            </div>
+                             {message && <p className="text-white text-sm mt-2 h-5 bg-black/30 rounded-full">{message}</p>}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- 中奖结果弹窗 ---
+        const PrizeAnnounceModal = ({ prize, onClose }) => {
+            if (!prize) return null;
+            const isWinner = prize.points > 0;
+            return (
+                 <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 animate-fade-in">
+                    <style>{`.animate-fade-in { animation: fade-in 0.3s ease-out; }`}</style>
+                    <div className="bg-gradient-to-br from-red-600 to-red-800 p-6 rounded-2xl shadow-2xl border-4 border-yellow-400 text-center text-white w-80 transform transition-all scale-100">
+                        <div className="flex justify-center -mt-16 mb-4">
+                            <PartyPopper size={80} className="text-yellow-300 drop-shadow-lg" />
+                        </div>
+                        <h2 className="text-3xl font-bold mb-2">{isWinner ? '恭喜中奖！' : '谢谢参与'}</h2>
+                        <p className="text-yellow-200 text-lg mb-6">{isWinner ? `您获得了 ${prize.text}！` : '再接再厉'}</p>
+                        <button type="button" onClick={onClose} className="bg-yellow-400 text-red-800 font-bold py-3 px-8 rounded-full shadow-lg">太棒了！</button>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- 主应用组件 ---
+        function CombinedApp() {
+            const [viewMode, setViewMode] = useLocalStorage('viewMode', 'user');
+            
+            // --- 所有共享的数据状态 ---
+            const [allUsersData, setAllUsersData] = useLocalStorage('allUsersData', {
+                [ADMIN_UID]: { uid: ADMIN_UID, phone: '138-0000-0001 (管理员)', points: 9999 },
+                [NORMAL_USER_UID]: { uid: NORMAL_USER_UID, phone: '186-1234-5678', points: 150, lastWheelSpin: null, checkInHistory: [] },
+            });
+            const [products, setProducts] = useLocalStorage('products', initialProducts);
+            const [goldPrice, setGoldPrice] = useLocalStorage('goldPrice', { price: 688.88, lastUpdated: new Date().toISOString() });
+            const [pointConversionRate, setPointConversionRate] = useLocalStorage('pointConversionRate', 1);
+            const [isUserLoggedIn, setIsUserLoggedIn] = useLocalStorage('isLoggedIn_user', false);
+            const [isAdminLoggedIn, setIsAdminLoggedIn] = useLocalStorage('isLoggedIn_admin', false);
+            const [isWheelModalOpen, setIsWheelModalOpen] = useState(false);
+            const [prizeWon, setPrizeWon] = useState(null);
+            // ---
+
+            const fetchGoldPrice = async () => {
+                try {
+                    await new Promise(res => setTimeout(res, 800));
+                    const randomFluctuation = (Math.random() - 0.5) * 10;
+                    const newPrice = 690.00 + randomFluctuation;
+                    setGoldPrice({
+                        price: newPrice,
+                        lastUpdated: new Date().toISOString()
+                    });
+                    console.log("Gold price updated:", newPrice);
+                } catch (error) {
+                    console.error("Failed to fetch gold price:", error);
+                }
+            };
+
+            useEffect(() => {
+                fetchGoldPrice();
+            }, []);
+
+
+            const updateUserPoints = (userId, newPoints) => {
+                setAllUsersData(prevData => ({
+                    ...prevData,
+                    [userId]: { ...prevData[userId], points: newPoints }
+                }));
+            };
+            
+            const updateUserWheelSpin = (userId, dateString) => {
+                setAllUsersData(prevData => ({
+                    ...prevData,
+                    [userId]: { ...prevData[userId], lastWheelSpin: dateString }
+                }));
+            };
+            
+            const updateUserCheckIn = (userId, newHistory) => {
+                 setAllUsersData(prevData => ({
+                    ...prevData,
+                    [userId]: { ...prevData[userId], checkInHistory: newHistory }
+                }));
+            };
+
+            const sharedProps = {
+                allUsersData,
+                products, setProducts,
+                goldPrice,
+                updateUserPoints,
+                pointConversionRate, setPointConversionRate,
+                fetchGoldPrice,
+                updateUserCheckIn
+            };
+            
+            return (
+                <React.Fragment>
+                    {viewMode === 'user' ? (
+                        <UserApp 
+                            isLoggedIn={isUserLoggedIn}
+                            login={() => setIsUserLoggedIn(true)}
+                            logout={() => setIsUserLoggedIn(false)}
+                            setIsWheelModalOpen={setIsWheelModalOpen}
+                            {...sharedProps}
+                        />
+                    ) : (
+                        <AdminApp 
+                            isLoggedIn={isAdminLoggedIn}
+                            login={() => setIsAdminLoggedIn(true)}
+                            logout={() => {
+                                setIsAdminLoggedIn(false)
+                                setViewMode('user'); 
+                            }}
+                            {...sharedProps}
+                        />
+                    )}
+                    <ViewModeToggle currentMode={viewMode} setViewMode={setViewMode} />
+                    <LuckyWheelModal
+                        isOpen={isWheelModalOpen}
+                        setIsOpen={setIsWheelModalOpen}
+                        user={isUserLoggedIn ? allUsersData[NORMAL_USER_UID] : null}
+                        isLoggedIn={isUserLoggedIn}
+                        updateUserPoints={updateUserPoints}
+                        updateUserWheelSpin={updateUserWheelSpin}
+                        setPrizeWon={setPrizeWon}
+                    />
+                    <PrizeAnnounceModal 
+                        prize={prizeWon} 
+                        onClose={() => {
+                            setPrizeWon(null);
+                            setIsWheelModalOpen(false);
+                        }} 
+                    />
+                </React.Fragment>
+            );
+        }
+
+        // --- 视图切换按钮 ---
+        const ViewModeToggle = ({ currentMode, setViewMode }) => {
+            return (
+                <button
+                    onClick={() => setViewMode(currentMode === 'user' ? 'admin' : 'user')}
+                    className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-transform transform hover:scale-110 z-50 flex items-center space-x-2"
+                >
+                    {currentMode === 'user' ? <Computer size={24} /> : <Smartphone size={24} />}
+                    <span className="text-sm font-semibold">{currentMode === 'user' ? '后台' : '用户端'}</span>
+                </button>
+            );
+        };
+
+        // --- 通用子组件 ---
+        const NavItem = ({ icon, label, active, onClick }) => (
+            <button type="button" onClick={onClick} className={`flex flex-col items-center justify-center transition-colors duration-200 w-full ${active ? 'text-amber-500' : 'text-gray-500'}`}>
+                {icon}
+                <span className="text-xs mt-1">{label}</span>
+            </button>
+        );
+
+        const ActionItem = ({ icon, label, onClick }) => (
+            <div onClick={onClick} className="flex flex-col items-center space-y-2 cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                {icon}
+                <span className="text-sm text-gray-700">{label}</span>
+            </div>
+        );
+
+        const ProductCard = ({ product, onClick }) => (
+            <div onClick={onClick} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 cursor-pointer hover:shadow-lg transition-shadow">
+                <img src={product.image} alt={product.name} className="w-full h-32 object-cover" />
+                <div className="p-3">
+                    <h4 className="text-sm font-semibold truncate">{product.name}</h4>
+                    <p className="text-xs text-gray-500 mt-1">{product.weight}</p>
+                </div>
+            </div>
+        );
+
+        const ProductCardWide = ({ product, onClick }) => (
+             <div onClick={onClick} className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100 flex items-center space-x-4 p-3 cursor-pointer hover:shadow-md transition-shadow">
+                <img src={product.image} alt={product.name} className="w-24 h-24 object-cover rounded-md" />
+                <div className="flex-grow">
+                    <h4 className="text-base font-semibold">{product.name}</h4>
+                    <p className="text-sm text-gray-600 mt-2">{product.weight}</p>
+                </div>
+            </div>
+        );
+
+        const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg shadow-2xl p-6 w-11/12 max-w-sm m-4">
+                        <h2 className="text-lg font-bold mb-4">{title}</h2>
+                        <p className="text-gray-600 mb-6">{message}</p>
+                        <div className="flex justify-end space-x-3">
+                            <button onClick={onClose} className="bg-gray-200 text-gray-700 font-bold px-4 py-2 rounded-md hover:bg-gray-300">取消</button>
+                            <button onClick={onConfirm} className="bg-red-500 text-white font-bold px-4 py-2 rounded-md hover:bg-red-600">确认</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+
+        // ┌───────────────────────────────────┐
+        // │          用户端应用 (UserApp)       │
+        // └───────────────────────────────────┘
+        const UserApp = ({ isLoggedIn, login, logout, allUsersData, products, goldPrice, updateUserPoints, updateUserCheckIn, setIsWheelModalOpen }) => {
+            const [page, setPage] = useState('home');
+            const [selectedProductId, setSelectedProductId] = useState(null);
+            const currentUser = isLoggedIn ? allUsersData[NORMAL_USER_UID] : null;
+
+            if (selectedProductId) {
+                return <UserProductDetailPage productId={selectedProductId} products={products} onBack={() => setSelectedProductId(null)} />
+            }
+            
+            return (
+                <div className="font-sans antialiased bg-gray-50 text-gray-800 max-w-lg mx-auto min-h-screen shadow-2xl flex flex-col">
+                    <main className="flex-grow pb-28">
+                        <div style={{ display: page === 'home' ? 'block' : 'none' }}>
+                            <UserHomePage setPage={setPage} isLoggedIn={isLoggedIn} user={currentUser} products={products} setSelectedProductId={setSelectedProductId} goldPrice={goldPrice} setIsWheelModalOpen={setIsWheelModalOpen} />
+                        </div>
+                         <div style={{ display: page === 'categories' ? 'block' : 'none' }}>
+                            <UserCategoriesPage products={products} setSelectedProductId={setSelectedProductId} />
+                        </div>
+                         <div style={{ display: page === 'points' ? 'block' : 'none' }}>
+                            <UserPointsPage user={currentUser} isLoggedIn={isLoggedIn} login={login} />
+                        </div>
+                         <div style={{ display: page === 'daily-check-in' ? 'block' : 'none' }}>
+                            <UserDailyCheckInPage onBack={() => setPage('home')} user={currentUser} isLoggedIn={isLoggedIn} login={login} updateUserCheckIn={updateUserCheckIn} updateUserPoints={updateUserPoints}/>
+                        </div>
+                         <div style={{ display: page === 'profile' ? 'block' : 'none' }}>
+                            <UserProfilePage user={currentUser} isLoggedIn={isLoggedIn} login={login} logout={logout} />
+                        </div>
+                    </main>
+                    <UserBottomNav page={page} setPage={setPage} />
+                </div>
+            );
+        };
+
+        // --- 用户端组件 ---
+        const UserBottomNav = ({ page, setPage }) => (
+            <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center h-16 max-w-lg mx-auto">
+                <NavItem icon={<Home />} label="首页" active={page === 'home'} onClick={() => setPage('home')} />
+                <NavItem icon={<Layers />} label="分类" active={page === 'categories'} onClick={() => setPage('categories')} />
+                <NavItem icon={<Award />} label="积分" active={page === 'points'} onClick={() => setPage('points')} />
+                <NavItem icon={<User />} label="我的" active={page === 'profile'} onClick={() => setPage('profile')} />
+            </nav>
+        );
+
+        const UserHomePage = ({ setPage, isLoggedIn, user, products, setSelectedProductId, goldPrice, setIsWheelModalOpen }) => {
+            const [searchTerm, setSearchTerm] = useState('');
+            const hotProducts = products.slice(0, 4); 
+
+            const searchedProducts = useMemo(() => {
+                if (!searchTerm.trim()) {
+                    return null; // Return null when no active search
+                }
+                return products.filter(p =>
+                    p.name.toLowerCase().includes(searchTerm.trim().toLowerCase())
+                );
+            }, [searchTerm, products]);
+
+            return (
+                 <div className="p-4 space-y-6 bg-white">
+                    <header className="flex justify-between items-center">
+                        {isLoggedIn && user ? (
+                            <div className="flex items-center space-x-3">
+                                <CircleUserRound size={32} className="text-amber-600" />
+                                <div>
+                                    <p className="text-sm font-semibold text-gray-800">欢迎您</p>
+                                    <p className="text-xs text-gray-500">{user.phone}</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex items-center space-x-2">
+                                 <Gem className="text-amber-500" />
+                                 <button type="button" onClick={() => setPage('profile')} className="font-bold text-lg text-gray-800 hover:text-amber-600 transition-colors">
+                                     点击登录/注册
+                                 </button>
+                            </div>
+                        )}
+                         <div className="text-right">
+                            <p className="text-sm text-gray-500">实时金价 (元/克)</p>
+                            <p className="text-xl font-bold text-red-600 flex items-center">
+                                ¥{goldPrice.price.toFixed(2)}
+                            </p>
+                         </div>
+                    </header>
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                         <input
+                            type="text"
+                            placeholder="搜索商品，如“财神”"
+                            className="w-full bg-gray-100 border-none rounded-full py-2 pl-10 pr-4 focus:ring-amber-500 focus:ring-2"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+
+                    {searchedProducts ? (
+                        <div>
+                            <h3 className="font-bold text-lg mb-2">搜索结果</h3>
+                            {searchedProducts.length > 0 ? (
+                                <div className="grid grid-cols-2 gap-4">
+                                    {searchedProducts.map(p => <ProductCard key={p.id} product={p} onClick={() => setSelectedProductId(p.id)} />)}
+                                </div>
+                            ) : (
+                                <p className="text-center text-gray-500 mt-8">未找到相关商品。</p>
+                            )}
+                        </div>
+                    ) : (
+                        <React.Fragment>
+                            <div className="bg-gradient-to-r from-amber-400 to-yellow-500 rounded-xl p-6 text-white text-center shadow-lg">
+                                <h2 className="text-2xl font-bold mb-2">艺境循宝</h2>
+                                <p className="mb-4">打卡集星 解锁惊喜宝藏</p>
+                                <button type="button" onClick={() => setPage('categories')} className="bg-white text-amber-600 font-bold py-2 px-6 rounded-full shadow-md hover:bg-gray-100 transition">立即选购</button>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 text-center">
+                                 <ActionItem icon={<CalendarCheck size={32} className="text-green-500"/>} label="每日签到" onClick={() => setPage('daily-check-in')} />
+                                 <ActionItem icon={<Gift size={32} className="text-red-500"/>} label="幸运大转盘" onClick={() => setIsWheelModalOpen(true)} />
+                                <ActionItem icon={<Award size={32} className="text-blue-500"/>} label="我的积分" onClick={() => setPage('points')} />
+                            </div>
+                            <div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <h3 className="font-bold text-lg">热卖爆款</h3>
+                                    <a href="#" onClick={(e) => { e.preventDefault(); setPage('categories'); }} className="text-sm text-gray-500 flex items-center">查看全部 <ChevronRight size={16} /></a>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {hotProducts.map(p => <ProductCard key={p.id} product={p} onClick={() => setSelectedProductId(p.id)} />)}
+                                </div>
+                            </div>
+                        </React.Fragment>
+                    )}
+                </div>
+            );
+        };
+
+        const UserCategoriesPage = ({ products, setSelectedProductId }) => {
+            const [selectedCategory, setSelectedCategory] = useState('all');
+            
+            const filteredProducts = useMemo(() => {
+                if (selectedCategory === 'all') return products;
+                return products.filter(p => p.category === selectedCategory);
+            }, [selectedCategory, products]);
+
+            return (
+                <div className="flex h-[calc(100vh-4rem)]">
+                    <div className="w-1/4 bg-gray-100 p-2 space-y-2 overflow-y-auto">
+                        {initialCategories.map(cat => (
+                            <button 
+                                type="button"
+                                key={cat.id}
+                                onClick={() => setSelectedCategory(cat.id)}
+                                className={`w-full text-left p-3 rounded-lg text-sm transition-colors ${selectedCategory === cat.id ? 'bg-amber-500 text-white shadow' : 'hover:bg-gray-200'}`}
+                            >
+                                {cat.name}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="w-3/4 p-4 bg-white overflow-y-auto">
+                        <h2 className="font-bold text-lg mb-4">{initialCategories.find(c => c.id === selectedCategory)?.name}</h2>
+                        <div className="grid grid-cols-1 gap-4">
+                            {filteredProducts.length > 0 ? filteredProducts.map(p => <ProductCardWide key={p.id} product={p} onClick={() => setSelectedProductId(p.id)} />) : <p>该分类下暂无商品。</p>}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const UserPointsPage = ({ user, isLoggedIn, login }) => {
+            if (!isLoggedIn) {
+                 return (
+                    <div className="p-8 text-center bg-white h-full flex flex-col justify-center items-center">
+                         <Award size={64} className="mx-auto my-4 text-gray-300" />
+                        <p className="text-gray-500 mb-6">登录后查看您的积分权益</p>
+                         <button type="button" onClick={login} className="bg-amber-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-amber-600 transition">
+                            立即登录
+                        </button>
+                    </div>
+                );
+            }
+            
+            const pointsValue = user ? (user.points / 100).toFixed(2) : '0.00';
+
+            return (
+                <div className="p-4 space-y-6 bg-gray-50 min-h-full">
+                    <header className="text-center">
+                         <h1 className="font-bold text-2xl text-amber-600">我的积分</h1>
+                         <p className="text-gray-500 text-sm">查看积分余额及使用规则</p>
+                    </header>
+
+                    <div className="bg-gradient-to-br from-amber-400 to-yellow-500 rounded-2xl p-6 text-white text-center shadow-xl flex flex-col items-center space-y-4">
+                        <p className="text-lg">我的可用积分</p>
+                        <p className="text-6xl font-bold tracking-tighter">{user.points}</p>
+                        <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                             <p className="font-semibold">可抵扣: <span className="text-2xl font-bold">¥{pointsValue}</span></p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-xl shadow-md space-y-4">
+                        <h3 className="font-bold text-lg flex items-center"><HelpCircle size={20} className="mr-2 text-amber-500"/>积分使用规则</h3>
+                        <ul className="list-disc list-inside text-gray-600 space-y-2">
+                            <li>积分仅限在线下实体门店使用。</li>
+                            <li><span className="font-bold text-red-500">100 积分 = 1 元人民币</span>，可用于抵扣商品工费。</li>
+                            <li>积分不可兑换现金，不设找零。</li>
+                            <li>到店消费时，请向店员出示此页面进行核销。</li>
+                        </ul>
+                    </div>
+                     
+                     <div className="bg-white p-6 rounded-xl shadow-md space-y-4">
+                        <h3 className="font-bold text-lg flex items-center"><Gift size={20} className="mr-2 text-amber-500"/>如何赚取积分</h3>
+                         <p className="text-sm text-gray-600">线下门店任意消费，即可由店员为您发放积分。</p>
+                    </div>
+                </div>
+            );
+        };
+
+        const UserProfilePage = ({ user, isLoggedIn, login, logout }) => {
+            if (!isLoggedIn || !user) {
+                return (
+                    <div className="p-8 text-center bg-white h-full flex flex-col justify-center">
+                        <CircleUserRound size={64} className="mx-auto my-4 text-gray-300" />
+                        <p className="text-gray-500 mb-6">登录后管理您的积分和订单</p>
+                        <div className="space-y-4">
+                            <button type="button" onClick={login} className="w-full bg-amber-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-amber-600 transition flex items-center justify-center space-x-2"><LogIn size={20}/><span>点击登录</span></button>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="p-4 space-y-6 bg-white">
+                    <div className="flex items-center justify-between p-4 bg-gradient-to-br from-amber-100 to-yellow-200 rounded-xl shadow">
+                         <div className="flex items-center space-x-4">
+                            <CircleUserRound size={64} className="text-amber-700" />
+                            <div>
+                                <h2 className="font-bold text-lg">{user.phone}</h2>
+                                <p className="text-sm text-gray-600">会员UID: {user.uid}</p>
+                                <div className="mt-2 flex items-center space-x-2 bg-white px-3 py-1 rounded-full">
+                                    <Star className="text-yellow-500" />
+                                    <span className="font-bold text-amber-600">{user.points} 积分</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" onClick={logout} className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"><LogOut size={20}/></button>
+                    </div>
+                </div>
+            );
+        };
+
+        const UserProductDetailPage = ({ productId, products, onBack }) => {
+            const [isStoreModalOpen, setIsStoreModalOpen] = useState(false);
+            const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
+            const product = products.find(p => p.id === productId);
+
+            if (!product) {
+                return (
+                    <div className="p-8 text-center">
+                        <h2 className="text-xl font-bold">未找到商品</h2>
+                        <button onClick={onBack} className="mt-4 text-amber-600">返回</button>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="bg-gray-50 min-h-screen">
+                     <header className="sticky top-0 bg-white shadow-sm z-10 flex items-center p-4 max-w-lg mx-auto">
+                        <button onClick={onBack} className="p-2 rounded-full hover:bg-gray-100">
+                            <ChevronLeft size={24} />
+                        </button>
+                        <h1 className="font-bold text-lg text-center flex-1">商品详情</h1>
+                    </header>
+                    
+                    <div className="max-w-lg mx-auto bg-white">
+                        <img src={product.image} alt={product.name} className="w-full h-auto" />
+                        
+                        <div className="p-4 space-y-4">
+                            <h2 className="text-2xl font-bold">{product.name}</h2>
+                            <p className="text-lg text-gray-600">{product.weight}</p>
+                        </div>
+
+                        <div className="mt-4 bg-gray-50 p-4">
+                             <div className="bg-white p-4 rounded-lg shadow-sm">
+                                 <h3 className="font-bold text-md mb-3 border-l-4 border-amber-500 pl-3">商品参数</h3>
+                                 <p className="text-gray-600 text-sm whitespace-pre-wrap">{product.params}</p>
+                             </div>
+                        </div>
+                        <div className="mt-4 bg-gray-50 p-4">
+                             <div className="bg-white p-4 rounded-lg shadow-sm">
+                                 <h3 className="font-bold text-md mb-3 border-l-4 border-amber-500 pl-3">图文详情</h3>
+                                 <p className="text-gray-600 text-sm mb-4">{product.description}</p>
+                                 <img src={product.image.replace('?random', '?random=d')} alt="详情图" className="w-full h-auto rounded-md" />
+                             </div>
+                        </div>
+                    </div>
+
+                    <footer className="fixed bottom-0 left-0 right-0 h-20 bg-white border-t flex items-center justify-around max-w-lg mx-auto px-4">
+                        <button type="button" onClick={() => setIsServiceModalOpen(true)} className="flex flex-col items-center text-gray-600 hover:text-amber-600">
+                            <Phone size={24} />
+                            <span className="text-xs mt-1">联系客服</span>
+                        </button>
+                        <button type="button" onClick={() => setIsStoreModalOpen(true)} className="w-2/3 bg-amber-500 text-white font-bold py-3 rounded-full hover:bg-amber-600 transition-colors">
+                            到店选购
+                        </button>
+                    </footer>
+                    <StoreInfoModal isOpen={isStoreModalOpen} onClose={() => setIsStoreModalOpen(false)} />
+                    <CustomerServiceModal isOpen={isServiceModalOpen} onClose={() => setIsServiceModalOpen(false)} />
+                </div>
+            );
+        };
+
+        const UserVipPage = ({ onBack, isLoggedIn, login }) => {
+            const [activeTab, setActiveTab] = useState('unused');
+            const [selectedVoucher, setSelectedVoucher] = useState(null);
+            const vouchers = initialVouchers; // Using static data for demo
+
+            if (!isLoggedIn) {
+                 return (
+                    <div className="p-8 text-center bg-white h-full flex flex-col justify-center items-center">
+                         <Ticket size={64} className="mx-auto my-4 text-gray-300" />
+                        <p className="text-gray-500 mb-6">登录后查看您的VIP尊享券</p>
+                         <button type="button" onClick={login} className="bg-amber-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-amber-600 transition">
+                            立即登录
+                        </button>
+                    </div>
+                );
+            }
+            
+            const filteredVouchers = vouchers.filter(v => v.status === activeTab);
+
+            return (
+                <div className="bg-gray-50 min-h-screen">
+                    <header className="sticky top-0 bg-white shadow-sm z-10 flex items-center p-4 max-w-lg mx-auto">
+                        <button onClick={onBack} className="p-2 rounded-full hover:bg-gray-100">
+                            <ChevronLeft size={24} />
+                        </button>
+                        <h1 className="font-bold text-lg text-center flex-1">我的尊享券</h1>
+                    </header>
+                    
+                    <div className="max-w-lg mx-auto">
+                        <div className="flex justify-around bg-white border-b">
+                            <button onClick={() => setActiveTab('unused')} className={`py-3 px-6 font-semibold ${activeTab === 'unused' ? 'text-amber-600 border-b-2 border-amber-600' : 'text-gray-500'}`}>未使用</button>
+                            <button onClick={() => setActiveTab('used')} className={`py-3 px-6 font-semibold ${activeTab === 'used' ? 'text-amber-600 border-b-2 border-amber-600' : 'text-gray-500'}`}>已使用</button>
+                            <button onClick={() => setActiveTab('expired')} className={`py-3 px-6 font-semibold ${activeTab === 'expired' ? 'text-amber-600 border-b-2 border-amber-600' : 'text-gray-500'}`}>已过期</button>
+                        </div>
+                        <div className="p-4 space-y-4">
+                            {filteredVouchers.length > 0 ? (
+                                filteredVouchers.map(voucher => <VoucherCard key={voucher.id} voucher={voucher} onUse={() => setSelectedVoucher(voucher)} />)
+                            ) : (
+                                <p className="text-center text-gray-500 mt-8">暂无优惠券</p>
+                            )}
+                        </div>
+                    </div>
+                    <VoucherDetailModal voucher={selectedVoucher} onClose={() => setSelectedVoucher(null)} />
+                </div>
+            );
+        };
+
+        const UserDailyCheckInPage = ({ onBack, user, isLoggedIn, login, updateUserCheckIn, updateUserPoints }) => {
+            const today = new Date();
+            const [currentMonth, setCurrentMonth] = useState(today.getMonth());
+            const [currentYear, setCurrentYear] = useState(today.getFullYear());
+            const [checkInMessage, setCheckInMessage] = useState('');
+            const timerRef = useRef(null);
+
+            useEffect(() => {
+                // Cleanup function to clear the timeout when the component unmounts
+                return () => {
+                    clearTimeout(timerRef.current);
+                };
+            }, []);
+
+            if (!isLoggedIn) {
+                 return (
+                    <div className="p-8 text-center bg-white h-full flex flex-col justify-center items-center">
+                         <CalendarCheck size={64} className="mx-auto my-4 text-gray-300" />
+                        <p className="text-gray-500 mb-6">登录后才能签到哦</p>
+                         <button type="button" onClick={login} className="bg-amber-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-amber-600 transition">
+                            立即登录
+                        </button>
+                    </div>
+                );
+            }
+
+            const handleCheckIn = (day) => {
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                if (user.checkInHistory.includes(dateStr)) return; // Already checked in
+
+                const pointsGained = Math.floor(Math.random() * 10) + 1; // 1-10 points
+                updateUserPoints(user.uid, user.points + pointsGained);
+                updateUserCheckIn(user.uid, [...user.checkInHistory, dateStr]);
+                setCheckInMessage(`签到成功！获得 ${pointsGained} 积分！`);
+                timerRef.current = setTimeout(() => setCheckInMessage(''), 3000);
+            };
+
+            const generateCalendar = () => {
+                const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+                const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+                const calendarDays = [];
+
+                for (let i = 0; i < firstDay; i++) {
+                    calendarDays.push(<div key={`empty-${i}`} className="w-10 h-10"></div>);
+                }
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const isToday = day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
+                    const isCheckedIn = user.checkInHistory.includes(dateStr);
+
+                    let dayClass = "w-10 h-10 flex items-center justify-center rounded-full";
+                    if (isToday && !isCheckedIn) {
+                        dayClass += " bg-amber-500 text-white cursor-pointer animate-pulse";
+                    } else if (isCheckedIn) {
+                        dayClass += " bg-amber-200 text-amber-700 font-bold";
+                    } else {
+                        dayClass += " bg-gray-100 text-gray-600";
+                    }
+
+                    calendarDays.push(
+                        <button key={day} onClick={() => isToday && !isCheckedIn && handleCheckIn(day)} disabled={!isToday || isCheckedIn} className={dayClass}>
+                            {day}
+                        </button>
+                    );
+                }
+                return calendarDays;
+            };
+
+            return (
+                <div className="bg-gray-50 min-h-screen">
+                     <header className="sticky top-0 bg-white shadow-sm z-10 flex items-center p-4 max-w-lg mx-auto">
+                        <button onClick={onBack} className="p-2 rounded-full hover:bg-gray-100">
+                            <ChevronLeft size={24} />
+                        </button>
+                        <h1 className="font-bold text-lg text-center flex-1">每日签到</h1>
+                    </header>
+                    <div className="p-4">
+                        <div className="bg-white p-6 rounded-xl shadow-md">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-bold">{`${currentYear}年 ${currentMonth + 1}月`}</h2>
+                                <p className="text-sm text-gray-500">连续签到有惊喜哦！</p>
+                            </div>
+                             <div className="h-6 text-center mb-2">
+                                {checkInMessage && (
+                                    <p className="text-green-600 font-semibold animate-pulse">{checkInMessage}</p>
+                                )}
+                            </div>
+                            <div className="grid grid-cols-7 gap-2 text-center text-xs text-gray-500 mb-2">
+                                <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+                            </div>
+                            <div className="grid grid-cols-7 gap-2">
+                                {generateCalendar()}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const VoucherCard = ({ voucher, onUse }) => {
+            const isInactive = voucher.status === 'used' || voucher.status === 'expired';
+            return (
+                <div className={`bg-white rounded-lg shadow-md flex overflow-hidden relative ${isInactive ? 'opacity-50' : ''}`}>
+                    <div className="w-1/4 bg-gradient-to-br from-amber-400 to-yellow-500 flex flex-col items-center justify-center text-white p-4">
+                        {voucher.type === 'deduction' && (
+                            <React.Fragment>
+                                <span className="text-sm">¥</span>
+                                <span className="text-4xl font-bold">{voucher.value}</span>
+                            </React.Fragment>
+                        )}
+                         {voucher.type === 'experience' && <Gift size={32} />}
+                         {voucher.type === 'discount' && <span className="text-2xl font-bold">98折</span>}
+                    </div>
+                    <div className="w-3/4 p-4 flex flex-col justify-between">
+                        <div>
+                            <h3 className="font-bold text-lg">{voucher.title}</h3>
+                            <p className="text-xs text-gray-500">{voucher.description}</p>
+                        </div>
+                        <div className="flex justify-between items-end mt-2">
+                            <p className="text-xs text-gray-400">有效期至: {voucher.expiryDate}</p>
+                            {voucher.status === 'unused' && (
+                                <button onClick={onUse} className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full">立即使用</button>
+                            )}
+                        </div>
+                    </div>
+                    {isInactive && (
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform rotate-12 border-4 border-gray-400 text-gray-400 text-2xl font-bold px-4 py-2 rounded-md">
+                            {voucher.status === 'used' ? '已使用' : '已过期'}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+
+        const StoreInfoModal = ({isOpen, onClose}) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50"><div className="bg-white rounded-lg shadow-2xl p-6 w-11/12 max-w-md m-4"><div className="flex justify-between items-center mb-4"><h2 className="text-xl font-bold text-gray-800">门店信息</h2><button type="button" onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button></div><div className="space-y-4"><img src="https://picsum.photos/800/400?random=map" alt="门店地图" className="w-full h-40 object-cover rounded-md" /><div className="text-gray-700 space-y-3"><div className="flex items-start"><Store size={20} className="mr-3 mt-1 text-amber-500 flex-shrink-0" /><p><span className="font-semibold">黄金商城 旗舰店</span></p></div><div className="flex items-start"><MapPin size={20} className="mr-3 mt-1 text-amber-500 flex-shrink-0" /><p>XX省 XX市 XX区 人民路 123号 金饰大厦 一楼</p></div><div className="flex items-start"><Phone size={20} className="mr-3 mt-1 text-amber-500 flex-shrink-0" /><p>010-8888-8888</p></div><div className="flex items-start"><Clock size={20} className="mr-3 mt-1 text-amber-500 flex-shrink-0" /><p>周一至周日 09:00 - 21:00</p></div></div><button type="button" onClick={onClose} className="w-full bg-amber-500 text-white font-bold py-3 rounded-lg hover:bg-amber-600 transition-colors mt-4">我知道了</button></div></div></div>
+            );
+        };
+
+        const CustomerServiceModal = ({isOpen, onClose}) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50"><div className="bg-white rounded-lg shadow-2xl p-6 w-11/12 max-w-md m-4"><div className="flex justify-between items-center mb-4"><h2 className="text-xl font-bold text-gray-800">联系专属客服</h2><button type="button" onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button></div><div className="flex flex-col items-center text-center space-y-4"><img src="https://placehold.co/200x200/FBBF24/333333?text=QR+Code" alt="客服二维码" className="w-32 h-32 rounded-lg" /><p className="text-sm text-gray-500">截图保存，打开微信扫一扫</p><div><p className="font-semibold text-lg">您的专属顾问 - 小金</p><p className="text-sm text-gray-500">随时为您服务</p></div><div className="w-full pt-4 border-t"><div className="flex items-center justify-between py-2"><span className="text-gray-600">服务电话</span><a href="tel:13888888888" className="font-semibold text-amber-600">138-8888-8888 (点击呼叫)</a></div><div className="flex items-center justify-between py-2"><span className="text-gray-600">客服微信</span><span className="font-semibold text-amber-600">gold_cs_888 (长按复制)</span></div></div><p className="text-xs text-gray-400 pt-2">服务时间：周一至周日 09:00 - 22:00</p><button type="button" onClick={onClose} className="w-full bg-amber-500 text-white font-bold py-3 rounded-lg hover:bg-amber-600 transition-colors mt-4">我知道了</button></div></div></div>
+            );
+        };
+
+        const VoucherDetailModal = ({ voucher, onClose }) => {
+            if (!voucher) return null;
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg shadow-2xl p-6 w-11/12 max-w-sm m-4 text-center">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-gray-800">核销凭证</h2>
+                            <button type="button" onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
+                        </div>
+                        <div className="space-y-4">
+                            <div className="bg-amber-500 text-white p-4 rounded-lg">
+                                <h3 className="text-2xl font-bold">{voucher.title}</h3>
+                                <p className="text-sm">{voucher.description}</p>
+                            </div>
+                            <img src={`https://placehold.co/256x256/333333/FFFFFF?text=${voucher.id}`} alt="核销二维码" className="w-48 h-48 mx-auto rounded-lg" />
+                            <p className="text-sm text-gray-600">请向店员出示此券进行核销</p>
+                            <div className="text-xs text-gray-400 border-t pt-4">
+                                <p>券编号: {voucher.id}</p>
+                                <p>有效期至: {voucher.expiryDate}</p>
+                            </div>
+                            <button type="button" onClick={onClose} className="w-full bg-amber-500 text-white font-bold py-3 rounded-lg hover:bg-amber-600 transition-colors mt-4">
+                                我知道了
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+
+        // ┌───────────────────────────────────┐
+        // │          后台管理应用 (AdminApp)      │
+        // └───────────────────────────────────┘
+        const AdminApp = ({ isLoggedIn, login, logout, allUsersData, products, setProducts, goldPrice, updateUserPoints, pointConversionRate, setPointConversionRate, fetchGoldPrice }) => {
+            const [page, setPage] = useState('dashboard');
+            
+            if (!isLoggedIn) {
+                return <AdminLogin onLogin={login} />;
+            }
+
+            const renderPage = () => {
+                switch (page) {
+                    case 'dashboard':
+                        return <AdminDashboard products={products} />;
+                    case 'products':
+                        return <AdminProductManagement products={products} setProducts={setProducts} />;
+                    case 'points-operation':
+                        return <AdminPointsOperationPage allUsersData={allUsersData} updateUserPoints={updateUserPoints} pointConversionRate={pointConversionRate} />;
+                    case 'settings':
+                        return <AdminSettingsPage goldPrice={goldPrice} pointConversionRate={pointConversionRate} setPointConversionRate={setPointConversionRate} fetchGoldPrice={fetchGoldPrice} />;
+                    default:
+                        return <AdminDashboard products={products}/>;
+                }
+            };
+
+            return (
+                <div className="flex h-screen bg-gray-100 font-sans">
+                    <AdminSidebar page={page} setPage={setPage} onLogout={logout} />
+                    <main className="flex-1 p-8 overflow-y-auto">
+                        {renderPage()}
+                    </main>
+                </div>
+            );
+        }
+
+        // --- 后台组件 ---
+        const AdminLogin = ({ onLogin }) => (
+            <div className="w-full h-screen flex items-center justify-center bg-gray-200">
+                <div className="bg-white p-8 rounded-lg shadow-2xl text-center w-full max-w-sm">
+                    <Gem size={48} className="mx-auto text-amber-500 mb-4" />
+                    <h1 className="text-2xl font-bold mb-2">后台管理系统</h1>
+                    <p className="text-gray-500 mb-6">请输入管理员凭据登录</p>
+                    <div className="space-y-4">
+                        <input type="text" placeholder="管理员账号" defaultValue="admin" className="w-full border-gray-300 rounded-md shadow-sm" />
+                        <input type="password" placeholder="密码" defaultValue="password" className="w-full border-gray-300 rounded-md shadow-sm" />
+                        <button onClick={onLogin} className="w-full bg-amber-500 text-white font-bold py-3 rounded-lg hover:bg-amber-600 transition">登录</button>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const AdminSidebar = ({ page, setPage, onLogout }) => {
+            const navItems = [
+                { id: 'dashboard', label: '仪表盘', icon: <LayoutDashboard /> },
+                { id: 'products', label: '商品管理', icon: <Gem /> },
+                { id: 'points-operation', label: '积分操作', icon: <ArrowRightLeft /> },
+                { id: 'settings', label: '系统设置', icon: <Settings /> },
+            ];
+            return (
+                <aside className="w-64 bg-white shadow-md flex flex-col">
+                    <div className="p-6 text-center border-b"><h1 className="text-xl font-bold text-amber-600">黄金商城后台</h1></div>
+                    <nav className="flex-1 p-4 space-y-2">
+                        {navItems.map(item => (
+                            <button key={item.id} onClick={() => setPage(item.id)} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${page === item.id ? 'bg-amber-100 text-amber-700' : 'text-gray-600 hover:bg-gray-100'}`}>
+                                {item.icon} <span className="font-semibold">{item.label}</span>
+                            </button>
+                        ))}
+                    </nav>
+                    <div className="p-4 border-t">
+                        <button onClick={onLogout} className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-red-100 hover:text-red-700 transition-colors">
+                            <LogOut /> <span className="font-semibold">退出登录</span>
+                        </button>
+                    </div>
+                </aside>
+            );
+        };
+
+        const AdminDashboard = ({ products }) => {
+            return (
+                <div>
+                    <h1 className="text-3xl font-bold mb-8">仪表盘</h1>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                         <div className="bg-white p-6 rounded-lg shadow"><h2 className="text-lg font-semibold text-gray-500">总商品数量</h2><p className="text-4xl font-bold text-blue-500">{products.length}</p></div>
+                    </div>
+                </div>
+            );
+        };
+
+        const AdminProductManagement = ({ products, setProducts }) => {
+            const [isModalOpen, setIsModalOpen] = useState(false);
+            const [editingProduct, setEditingProduct] = useState(null);
+            const [filterCategory, setFilterCategory] = useState('all');
+            const [searchTerm, setSearchTerm] = useState('');
+            const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+            const [deletingProductId, setDeletingProductId] = useState(null);
+
+            const openModal = (product = null) => { setEditingProduct(product); setIsModalOpen(true); };
+            const closeModal = () => { setIsModalOpen(false); setEditingProduct(null); };
+
+            const handleSave = (productData) => {
+                if (editingProduct) { setProducts(products.map(p => p.id === productData.id ? productData : p)); } 
+                else { setProducts([...products, { ...productData, id: 'P' + Date.now() }]); }
+                closeModal();
+            };
+
+            const handleDelete = (productId) => {
+                setDeletingProductId(productId);
+                setIsConfirmModalOpen(true);
+            }
+            
+            const confirmDelete = () => {
+                setProducts(products.filter(p => p.id !== deletingProductId));
+                setIsConfirmModalOpen(false);
+                setDeletingProductId(null);
+            }
+
+            const filteredProducts = useMemo(() => {
+                return products
+                    .filter(p => filterCategory === 'all' || p.category === filterCategory)
+                    .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+            }, [products, filterCategory, searchTerm]);
+
+            return (
+                <div>
+                    <div className="flex flex-wrap gap-4 justify-between items-center mb-8">
+                         <h1 className="text-3xl font-bold">商品管理</h1>
+                         <div className="flex items-center gap-4">
+                             <div className="relative">
+                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                                 <input type="text" placeholder="搜索商品名称..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg" />
+                             </div>
+                              <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} className="border-gray-300 rounded-lg">
+                                 {initialCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                             </select>
+                             <button onClick={() => openModal()} className="bg-amber-500 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2 hover:bg-amber-600"><PlusCircle size={20}/><span>上架新商品</span></button>
+                         </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {filteredProducts.map(p => (
+                            <div key={p.id} className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+                                <img src={p.image} alt={p.name} className="w-full h-40 object-cover" />
+                                <div className="p-4 flex flex-col flex-grow">
+                                     <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full self-start">{initialCategories.find(c=>c.id === p.category)?.name}</span>
+                                     <h3 className="font-bold text-lg mt-2 flex-grow">{p.name}</h3>
+                                     <p className="text-sm text-gray-500">{p.weight}</p>
+                                </div>
+                                <div className="p-4 border-t flex justify-end space-x-2 bg-gray-50">
+                                    <button onClick={() => openModal(p)} className="p-2 text-blue-500 hover:bg-blue-100 rounded-full"><Edit size={18}/></button>
+                                    <button onClick={() => handleDelete(p.id)} className="p-2 text-red-500 hover:bg-red-100 rounded-full"><Trash2 size={18}/></button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    {isModalOpen && <ProductModal product={editingProduct} onSave={handleSave} onClose={closeModal} />}
+                    <ConfirmationModal 
+                        isOpen={isConfirmModalOpen}
+                        onClose={() => setIsConfirmModalOpen(false)}
+                        onConfirm={confirmDelete}
+                        title="确认删除"
+                        message="您确定要删除这个商品吗？此操作不可撤销。"
+                    />
+                </div>
+            );
+        };
+
+        const AdminPointsOperationPage = ({ allUsersData, updateUserPoints, pointConversionRate }) => {
+            const [isDeductModalOpen, setIsDeductModalOpen] = useState(false);
+            const [isGrantModalOpen, setIsGrantModalOpen] = useState(false);
+
+            return (
+                 <div>
+                    <h1 className="text-3xl font-bold mb-8">积分操作</h1>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="bg-white p-6 rounded-lg shadow space-y-4"><h2 className="text-xl font-bold">发放积分</h2><p className="text-sm text-gray-500">根据顾客线下消费金额，手动为会员发放积分。</p><button onClick={() => setIsGrantModalOpen(true)} className="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600">发放消费积分</button></div>
+                        <div className="bg-white p-6 rounded-lg shadow space-y-4"><h2 className="text-xl font-bold">抵扣积分</h2><p className="text-sm text-gray-500">当顾客使用积分抵扣工费时，请使用此功能。</p><button onClick={() => setIsDeductModalOpen(true)} className="w-full bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600">抵扣工费积分</button></div>
+                    </div>
+                     <DeductPointsModal isOpen={isDeductModalOpen} setIsOpen={setIsDeductModalOpen} allUsersData={allUsersData} updateUserPoints={updateUserPoints} />
+                     <GrantPointsModal isOpen={isGrantModalOpen} setIsOpen={setIsGrantModalOpen} allUsersData={allUsersData} updateUserPoints={updateUserPoints} rate={pointConversionRate} />
+                </div>
+            )
+        }
+
+        const AdminSettingsPage = ({ goldPrice, pointConversionRate, setPointConversionRate, fetchGoldPrice }) => {
+            const [rateInput, setRateInput] = useState(pointConversionRate);
+            const [isLoading, setIsLoading] = useState(false);
+            const [saveMessage, setSaveMessage] = useState({ text: '', type: '' });
+            const timerRef = useRef(null);
+
+            useEffect(() => {
+                return () => {
+                    clearTimeout(timerRef.current);
+                };
+            }, []);
+
+            const handleRateSave = () => {
+                const newRate = parseFloat(rateInput);
+                if(!isNaN(newRate) && newRate > 0){ 
+                    setPointConversionRate(newRate); 
+                    setSaveMessage({ text: '积分兑换率更新成功！', type: 'success' });
+                } else { 
+                    setSaveMessage({ text: '请输入有效的正数。', type: 'error' });
+                }
+                timerRef.current = setTimeout(() => setSaveMessage({ text: '', type: '' }), 3000);
+            }
+
+            const handleRefreshPrice = async () => {
+                setIsLoading(true);
+                await fetchGoldPrice();
+                setIsLoading(false);
+            }
+            
+            return (
+                 <div>
+                    <h1 className="text-3xl font-bold mb-8">系统设置</h1>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="bg-white p-6 rounded-lg shadow space-y-4">
+                            <h2 className="text-xl font-bold">金价管理</h2>
+                            <div className="flex items-center space-x-4">
+                                <p className="text-4xl font-mono font-bold text-amber-600">¥{goldPrice.price.toFixed(2)}</p>
+                                <button onClick={handleRefreshPrice} disabled={isLoading} className="p-2 text-blue-500 hover:bg-blue-100 rounded-full disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <RefreshCw className={isLoading ? 'animate-spin' : ''} />
+                                </button>
+                            </div>
+                            <p className="text-xs text-gray-400">最后更新于: {new Date(goldPrice.lastUpdated).toLocaleString()}</p>
+                        </div>
+                        <div className="bg-white p-6 rounded-lg shadow space-y-4">
+                            <h2 className="text-xl font-bold">积分规则设置</h2>
+                            <div className="flex items-center space-x-2">
+                                <span className="text-gray-700">消费</span>
+                                <input type="number" value={rateInput} onChange={(e) => setRateInput(e.target.value)} className="w-20 border-gray-300 rounded-md shadow-sm"/>
+                                <span className="text-gray-700">元 = 1 积分</span>
+                                <button onClick={handleRateSave} className="bg-amber-500 text-white font-bold px-4 py-2 rounded-md hover:bg-amber-600">保存</button>
+                            </div>
+                            <div className="h-5">
+                                {saveMessage.text && (
+                                    <p className={`text-sm ${saveMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                                        {saveMessage.text}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+
+        const ProductModal = ({ product, onSave, onClose }) => {
+            const [formData, setFormData] = useState(product || { name: '', category: 'jingpin', weight: '', image: 'https://picsum.photos/400/400?random=' + Date.now(), params: '', description: '' });
+            const handleChange = (e) => { const { name, value } = e.target; setFormData(prev => ({ ...prev, [name]: value })); };
+            const handleSubmit = (e) => { e.preventDefault(); onSave(formData); };
+            return (
+                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"><div className="bg-white rounded-lg shadow-2xl p-6 w-full max-w-lg"><form onSubmit={handleSubmit} className="space-y-4"><h2 className="text-xl font-bold">{product ? '编辑商品' : '上架新商品'}</h2><div><label className="text-sm font-medium">名称</label><input type="text" name="name" value={formData.name} onChange={handleChange} className="w-full border-gray-300 rounded-md mt-1" required /></div><div><label className="text-sm font-medium">图片链接</label><input type="text" name="image" value={formData.image} onChange={handleChange} className="w-full border-gray-300 rounded-md mt-1" /></div><div className="grid grid-cols-2 gap-4"><div><label className="text-sm font-medium">分类</label><select name="category" value={formData.category} onChange={handleChange} className="w-full border-gray-300 rounded-md mt-1">{initialCategories.filter(c => c.id !== 'all').map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div><div><label className="text-sm font-medium">重量描述</label><input type="text" name="weight" value={formData.weight} onChange={handleChange} placeholder="例如: 12.15g起" className="w-full border-gray-300 rounded-md mt-1" /></div></div><div><label className="text-sm font-medium">商品参数</label><textarea name="params" value={formData.params} onChange={handleChange} rows="3" placeholder="例如: 材质: 足金999 | 工艺: 3D硬金" className="w-full border-gray-300 rounded-md mt-1"></textarea></div><div><label className="text-sm font-medium">图文详情</label><textarea name="description" value={formData.description} onChange={handleChange} rows="5" className="w-full border-gray-300 rounded-md mt-1"></textarea></div><div className="flex justify-end space-x-3"><button type="button" onClick={onClose} className="bg-gray-200 text-gray-700 font-bold px-4 py-2 rounded-md hover:bg-gray-300">取消</button><button type="submit" className="bg-amber-500 text-white font-bold px-4 py-2 rounded-md hover:bg-amber-600">保存商品</button></div></form></div></div>
+            )
+        }
+
+        const PointActionModal = ({ isOpen, setIsOpen, allUsersData, updateUserPoints, title, actionName, rate, children }) => {
+            const [userIdInput, setUserIdInput] = useState(NORMAL_USER_UID);
+            const [searchedUser, setSearchedUser] = useState(null);
+            const [amount, setAmount] = useState('');
+            const [message, setMessage] = useState('');
+            const timerRef = useRef(null);
+
+            useEffect(() => {
+                return () => {
+                    clearTimeout(timerRef.current);
+                };
+            }, []);
+            
+            const handleSearch = () => {
+                const userFound = allUsersData[userIdInput];
+                if (userFound) { setSearchedUser(userFound); setMessage(''); } 
+                else { setSearchedUser(null); setMessage('未找到该会员，请检查UID是否正确。'); }
+            };
+            
+            const handleAction = () => {
+                if (!searchedUser) { setMessage('请先查询会员。'); return; }
+                const numAmount = parseInt(amount, 10);
+                if (isNaN(numAmount) || numAmount <= 0) {
+                    setMessage('请输入有效的正数。');
+                    return;
+                }
+
+                let pointsToChange = 0;
+                let successMessage = '';
+                if (actionName === '发放') {
+                    pointsToChange = Math.floor(numAmount / rate);
+                    const newPoints = searchedUser.points + pointsToChange;
+                    updateUserPoints(searchedUser.uid, newPoints);
+                    successMessage = `成功发放 ${pointsToChange} 积分！`;
+                } else if (actionName === '抵扣') {
+                    pointsToChange = numAmount;
+                    if (searchedUser.points < pointsToChange) {
+                        setMessage('会员积分不足。');
+                        return;
+                    }
+                    const newPoints = searchedUser.points - pointsToChange;
+                    updateUserPoints(searchedUser.uid, newPoints);
+                    successMessage = `成功抵扣 ${pointsToChange} 积分！`;
+                }
+                
+                setMessage(successMessage);
+                setSearchedUser(prev => ({...prev, points: prev.points + (actionName === '发放' ? pointsToChange : -pointsToChange)}));
+                setAmount('');
+                timerRef.current = setTimeout(() => { setMessage(''); }, 3000);
+            };
+
+            const handleClose = () => { setIsOpen(false); setSearchedUser(null); setAmount(''); setMessage(''); };
+            
+            if (!isOpen) return null;
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50"><div className="bg-white rounded-lg shadow-2xl p-6 w-11/12 max-w-sm space-y-4"><div className="flex justify-between items-center"><h2 className="text-xl font-bold text-gray-800">{title}</h2><button type="button" onClick={handleClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button></div><div className="space-y-2"><label className="text-sm font-medium text-gray-700">第一步：输入会员UID查询</label><div className="flex space-x-2"><input type="text" value={userIdInput} onChange={(e) => setUserIdInput(e.target.value)} placeholder="在此输入会员UID" className="flex-grow border-gray-300 rounded-md shadow-sm"/><button type="button" onClick={handleSearch} className="bg-amber-500 text-white font-bold px-4 py-2 rounded-md hover:bg-amber-600">查询</button></div></div>{searchedUser && (<div className="bg-amber-50 p-4 rounded-lg space-y-4 animate-fade-in"><style>{`@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } } .animate-fade-in { animation: fade-in 0.5s; }`}</style><div><p className="text-sm text-gray-600">会员手机号: <span className="font-bold text-gray-800">{searchedUser.phone}</span></p><p className="text-sm text-gray-600">当前积分: <span className="font-bold text-gray-800">{searchedUser.points}</span></p></div>{children(amount, setAmount)}</div>)}<div className="h-6 text-center">{message && <p className={`text-sm ${message.includes('成功') ? 'text-green-600' : 'text-red-600'}`}>{message}</p>}</div><div className="flex justify-end space-x-3"><button type="button" onClick={handleClose} className="bg-gray-200 text-gray-700 font-bold px-4 py-2 rounded-md hover:bg-gray-300">取消</button><button type="button" onClick={handleAction} disabled={!searchedUser} className={`font-bold px-4 py-2 rounded-md disabled:bg-gray-300 ${actionName === '发放' ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-red-500 text-white hover:bg-red-600'}`}>{`确认${actionName}`}</button></div></div></div>
+            );
+        };
+
+        const GrantPointsModal = (props) => (
+            <PointActionModal {...props} title="发放消费积分" actionName="发放">
+                {(amount, setAmount) => (
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">第二步：输入消费金额 (元)</label>
+                        <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="输入顾客消费总金额" className="w-full border-gray-300 rounded-md shadow-sm"/>
+                        <p className="text-xs text-gray-500">根据当前规则: 消费 {props.rate} 元 = 1 积分</p>
+                    </div>
+                )}
+            </PointActionModal>
+        );
+
+        const DeductPointsModal = (props) => (
+             <PointActionModal {...props} title="抵扣工费积分" actionName="抵扣">
+                {(amount, setAmount) => (
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">第二步：输入抵扣积分</label>
+                        <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="输入要抵扣的积分数量" className="w-full border-gray-300 rounded-md shadow-sm"/>
+                         <p className="text-xs text-gray-500">100 积分 = 1 元</p>
+                    </div>
+                )}
+            </PointActionModal>
+        );
+
+        // --- Mount the React application to the DOM ---
+        ReactDOM.render(<CombinedApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
